@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('omsets', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('marketing_id')->constrained('marketings')->onDelete('cascade');
+            $table->date('periode_dari');
+            $table->date('periode_sampai');
+            $table->decimal('nominal', 15, 2);
             $table->timestamps();
         });
     }

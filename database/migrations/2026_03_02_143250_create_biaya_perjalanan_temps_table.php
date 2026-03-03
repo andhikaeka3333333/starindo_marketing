@@ -9,18 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    // database/migrations/xxxx_xx_xx_create_pengajuans_table.php
-    public function up()
+    public function up(): void
     {
-        Schema::create('pengajuans', function (Blueprint $table) {
+        Schema::create('biaya_perjalanan_temps', function (Blueprint $table) {
             $table->id();
             $table->foreignId('marketing_id')->constrained('marketings')->onDelete('cascade');
             $table->date('tanggal');
             $table->string('customer_nama');
             $table->string('customer_cp')->nullable();
-            
-            $table->decimal('nominal_value', 15, 2);
             $table->text('alamat')->nullable();
+            $table->string('kategori');
+            $table->integer('level')->nullable();
+            $table->string('wilayah')->nullable();
+            $table->decimal('nominal', 15, 2);
+            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pengajuans');
+        Schema::dropIfExists('biaya_perjalanan_temps');
     }
 };

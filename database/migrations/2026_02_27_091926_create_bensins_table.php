@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('bensins', function (Blueprint $table) {
             $table->id();
+            $table->date('tanggal');
+            $table->decimal('nominal', 15, 2);
+            $table->integer('km'); // Kilometer saat pengisian
+            $table->string('keterangan')->nullable();
             $table->timestamps();
         });
     }

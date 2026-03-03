@@ -43,12 +43,18 @@
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori Pengajuan</label>
-                        <select name="jenis_pengajuan" class="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold text-sm focus:ring-2 focus:ring-blue-600 shadow-inner">
-                            @foreach(['Komisi Penjualan', 'Entertain', 'Proposal'] as $jenis)
-                                <option value="{{ $jenis }}" {{ $pengajuan->jenis_pengajuan == $jenis ? 'selected' : '' }}>{{ $jenis }}</option>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori Pengajuan (Master Data)</label>
+                        <select name="kategori_pengajuan_id" class="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold text-sm focus:ring-2 focus:ring-blue-600 shadow-inner" required>
+                            <option value="">-- PILIH KATEGORI --</option>
+                            @foreach($kategoris as $kat)
+                                <option value="{{ $kat->id }}" {{ $pengajuan->kategori_pengajuan_id == $kat->id ? 'selected' : '' }}>
+                                    {{ strtoupper($kat->nama_kategori) }}
+                                </option>
                             @endforeach
                         </select>
+                        @error('kategori_pengajuan_id')
+                            <p class="text-red-500 text-[10px] font-bold mt-1 uppercase">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="space-y-2"
@@ -60,7 +66,6 @@
                                 return new Intl.NumberFormat('id-ID').format(val);
                             },
                             updateValue(e) {
-                                // Hanya ambil angka saja
                                 let val = e.target.value.replace(/\D/g, '');
                                 this.rawValue = val;
                                 this.displayValue = this.formatRupiah(val);
@@ -89,7 +94,7 @@
 
                     <div class="flex gap-4">
                         <button type="submit" class="flex-1 py-6 bg-blue-600 text-white rounded-3xl font-black uppercase tracking-[0.2em] shadow-xl shadow-blue-200 hover:bg-blue-700 hover:scale-[1.02] transition-all">
-                            Update Data
+                            Update Data Pengajuan
                         </button>
                     </div>
                 </form>

@@ -7,10 +7,31 @@ use App\Models\Marketing;
 
 class MarketingController extends Controller
 {
-    public function index()
+    public function index(Request $request) // Tambahkan Request
     {
-        $marketings = Marketing::orderBy('level', 'asc')->get();
-        return view('marketing.index', compact('marketings'));
+        $search = $request->query('search');
+
+        // Filter data untuk tabel
+        $marketings = Marketing::when($search, function ($query, $search) {
+            return $query->where('nama', 'like', "%{$search}%");
+        })
+            ->orderBy('level', 'asc')
+            ->paginate(10)
+            ->withQueryString(); // Agar keyword tidak hilang saat ganti halaman
+
+        // Statistik tetap mengambil total keseluruhan
+        $totalMarketing = Marketing::count();
+        $totalLevel1 = Marketing::where('level', 1)->count();
+        $totalLevel2 = Marketing::where('level', 2)->count();
+        $totalLevel3 = Marketing::where('level', 3)->count();
+
+        return view('marketing.index', compact(
+            'marketings',
+            'totalMarketing',
+            'totalLevel1',
+            'totalLevel2',
+            'totalLevel3'
+        ));
     }
 
     public function store(Request $request)
