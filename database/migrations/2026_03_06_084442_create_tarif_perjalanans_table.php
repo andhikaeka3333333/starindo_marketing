@@ -9,14 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('tols', function (Blueprint $table) {
+        Schema::create('tarif_perjalanan', function (Blueprint $table) {
             $table->id();
-            $table->string('keterangan');
-            $table->enum('tipe', ['topup', 'out']); // topup = isi, out = pemakaian
-            $table->decimal('nominal', 15, 2);
-            $table->decimal('saldo_akhir', 15, 2); // Saldo saat transaksi itu selesai
+            $table->string('kategori');
+            $table->string('wilayah');
+            $table->integer('level');
+            $table->decimal('nominal', 15, 2)->default(0);
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tols');
+        Schema::dropIfExists('tarif_perjalanans');
     }
 };

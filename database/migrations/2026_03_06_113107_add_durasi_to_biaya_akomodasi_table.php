@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bensins', function (Blueprint $table) {
-            $table->id();
-            $table->date('tanggal');
-            $table->decimal('nominal', 15, 2);
-            $table->integer('km'); // Kilometer saat pengisian
-            $table->string('keterangan')->nullable();
-            $table->timestamps();
+        Schema::table('biaya_akomodasi', function (Blueprint $table) {
+            $table->integer('durasi')->default(1);
+        });
+
+        Schema::table('temp_akomodasi', function (Blueprint $table) {
+            $table->integer('durasi')->default(1);
         });
     }
 
@@ -26,6 +25,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bensins');
+        Schema::table('biaya_akomodasi', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -1,155 +1,158 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-bold text-2xl text-slate-800 leading-tight">
-                {{ __('Master Data Marketing') }}
-            </h2>
+            <h2 class="font-black text-2xl text-slate-800 uppercase tracking-tighter italic">Master Data Marketing & Tarif</h2>
+            <div class="bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-end">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Personel</span>
+                <span class="text-lg font-black text-blue-600 italic leading-none">{{ $stats['total'] }} ORG</span>
+            </div>
         </div>
     </x-slot>
 
-    <div class="py-12 bg-slate-50 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-12 bg-slate-50 min-h-screen" x-data="{
+        showTarifModal: false,
+        formatRupiah(val) {
+            if (!val) return '';
+            let angka = val.toString().replace(/\D/g, '');
+            return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+    }">
+        <div class="max-w-[1400px] mx-auto sm:px-6 lg:px-8 space-y-8">
 
             @if(session('success'))
-                <div class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 rounded-r-lg shadow-sm flex items-center">
-                    <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                    <span class="font-bold">{{ session('success') }}</span>
+                <div class="p-4 bg-white border-l-8 border-blue-600 shadow-xl rounded-2xl text-slate-800 font-black italic uppercase text-xs tracking-widest">
+                    {{ session('success') }}
                 </div>
             @endif
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center md:text-left">
-                            <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total</p>
-                            <p class="text-xl font-bold text-slate-800">{{ $totalMarketing }}</p>
-                        </div>
-                        <div class="bg-indigo-600 p-4 rounded-2xl shadow-lg shadow-indigo-100 text-center md:text-left">
-                            <p class="text-[10px] font-semibold text-indigo-100 uppercase tracking-wider">Level 1</p>
-                            <p class="text-xl font-bold text-white">{{ $totalLevel1 }}</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center md:text-left">
-                            <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Level 2</p>
-                            <p class="text-xl font-bold text-slate-800">{{ $totalLevel2 }}</p>
-                        </div>
-                        <div class="bg-indigo-600 p-4 rounded-2xl shadow-lg shadow-emerald-100 text-center md:text-left">
-                            <p class="text-[10px] font-semibold text-emerald-50 uppercase tracking-wider text-white/90">Level 3</p>
-                            <p class="text-xl font-bold text-white">{{ $totalLevel3 }}</p>
-                        </div>
-                    </div>
+                <div class="lg:col-span-8 space-y-8">
 
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                        <form action="{{ url()->current() }}" method="GET" class="flex gap-3">
-                            <div class="relative flex-1">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                </div>
-                                <input type="text" name="search" value="{{ request('search') }}"
-                                    placeholder="Cari nama marketing..."
-                                    class="block w-full pl-11 pr-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 transition-all">
-                            </div>
-                            <button type="submit" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
-                                CARI
-                            </button>
-                            @if(request('search'))
-                                <a href="{{ url()->current() }}" class="px-4 py-3 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all flex items-center">
-                                    RESET
-                                </a>
-                            @endif
-                        </form>
-                    </div>
-
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-widest font-bold">
+                    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+                        <div class="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                            <h3 class="font-black text-slate-800 uppercase italic tracking-tighter">Data Marketing</h3>
+                            <form action="{{ url()->current() }}" method="GET" class="flex gap-2">
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari..." class="bg-white border-none rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-600 shadow-inner px-4 py-2">
+                                <button type="submit" class="bg-slate-900 text-white px-5 py-2 rounded-xl font-black uppercase text-[10px]">CARI</button>
+                            </form>
+                        </div>
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
                                 <tr>
-                                    <th class="px-6 py-4">Nama Marketing</th>
-                                    <th class="px-6 py-4 text-center">Level</th>
-                                    <th class="px-6 py-4 text-right">Aksi</th>
+                                    <th class="px-8 py-5">Marketing</th>
+                                    <th class="px-8 py-5">Kartu Tol</th>
+                                    <th class="px-8 py-5 text-center">Level</th>
+                                    <th class="px-8 py-5 text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-50">
-                                @forelse($marketings as $m)
-                                <tr class="hover:bg-slate-50/80 transition-colors group">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center">
-                                            <div class="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold group-hover:bg-indigo-100 group-hover:text-indigo-600 transition">
-                                                {{ strtoupper(substr($m->nama, 0, 1)) }}
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-bold text-slate-700">{{ $m->nama }}</div>
-                                                <div class="text-xs text-slate-400">ID: #{{ str_pad($m->id, 4, '0', STR_PAD_LEFT) }}</div>
-                                            </div>
-                                        </div>
+                                @foreach($marketings as $m)
+                                <tr>
+                                    <td class="px-8 py-5 font-black text-slate-700 italic">{{ $m->nama }}</td>
+                                    <td class="px-8 py-5 font-black text-xs text-blue-600 italic tracking-widest">{{ $m->no_kartu_tol ?? '----' }}</td>
+                                    <td class="px-8 py-5 text-center">
+                                        <span class="px-3 py-1 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase italic">LVL {{ $m->level }}</span>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
-                                        @php
-                                            $badgeClass = [
-                                                1 => 'bg-indigo-50 text-indigo-700 border-indigo-100',
-                                                2 => 'bg-amber-50 text-amber-700 border-amber-100',
-                                                3 => 'bg-emerald-50 text-emerald-700 border-emerald-100',
-                                            ][$m->level];
-                                        @endphp
-                                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase border {{ $badgeClass }}">
-                                            Lvl {{ $m->level }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="flex justify-end items-center gap-3">
-                                            <a href="{{ route('marketing.edit', $m->id) }}" class="p-2 bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    <td class="px-8 py-5">
+                                        <div class="flex justify-end gap-5">
+                                            <a href="{{ route('marketing.edit', $m->id) }}" class="text-slate-300 hover:text-blue-600 transition-colors">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                                    <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                                </svg>
                                             </a>
-                                            <form action="{{ route('marketing.destroy', $m->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?')">
+                                            <form action="{{ route('marketing.destroy', $m->id) }}" method="POST" onsubmit="return confirm('Hapus?')">
                                                 @csrf @method('DELETE')
-                                                <button type="submit" class="p-2 bg-slate-50 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                <button type="submit" class="text-slate-300 hover:text-red-600 transition-colors leading-none">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
                                                 </button>
                                             </form>
                                         </div>
                                     </td>
                                 </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="3" class="px-6 py-10 text-center text-slate-400 italic text-sm">
-                                        Marketing tidak ditemukan...
-                                    </td>
-                                </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
+                        <div class="p-6 bg-slate-50 border-t border-slate-100">{{ $marketings->links() }}</div>
                     </div>
 
-                    <div class="mt-6">
-                        {{ $marketings->links() }}
+                    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+                        <div class="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <h3 class="font-black text-slate-800 uppercase italic tracking-tighter">Master Tarif</h3>
+                            <button @click="showTarifModal = true" class="px-5 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all">
+                                + TAMBAH TARIF
+                            </button>
+                        </div>
+
+                        <form action="{{ route('marketing.update-tarif') }}" method="POST">
+                            @csrf
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
+                                    <tr>
+                                        <th class="px-8 py-5">Kategori</th>
+                                        <th class="px-8 py-5">Wilayah</th>
+                                        <th class="px-8 py-5 text-center">Level</th>
+                                        <th class="px-8 py-5 text-right">Nominal (Rp)</th>
+                                        <th class="px-8 py-5"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-50">
+                                    @foreach($daftarTarif as $t)
+                                    <tr class="hover:bg-slate-50/50" x-data="{ val: formatRupiah('{{ (int)$t->nominal }}') }">
+                                        <td class="px-8 py-4 font-black text-slate-800 italic uppercase">{{ $t->kategori }}</td>
+                                        <td class="px-8 py-4 font-bold text-slate-400 text-[10px] uppercase italic">{{ $t->wilayah }}</td>
+                                        <td class="px-8 py-4 text-center">
+                                            <span class="text-[10px] font-black text-slate-400 uppercase italic">Lvl {{ $t->level }}</span>
+                                        </td>
+                                        <td class="px-8 py-4">
+                                            <div class="flex items-center text-blue-600 font-black italic">
+                                                <span class="text-xs mr-1 opacity-30">Rp</span>
+                                                <input type="text" x-model="val" @input="val = formatRupiah($event.target.value)" class="w-full bg-transparent border-none focus:ring-0 p-0 font-black italic text-blue-600">
+                                                <input type="hidden" name="tarif[{{ $t->id }}]" :value="val.replace(/\./g, '')">
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-4 text-right">
+                                            <a href="{{ route('marketing.destroy-tarif', $t->id) }}" onclick="return confirm('Hapus?')" class="text-slate-200 hover:text-red-600 transition-colors">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <div class="p-8 bg-slate-50 border-t border-slate-100 flex justify-end">
+                                <button type="submit" class="px-8 py-3 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-emerald-700 transition-all">
+                                    Simpan Perubahan Nominal
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <div class="lg:col-span-1">
-                    <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 sticky top-8">
-                        <div class="flex items-center gap-3 mb-8">
-                            <div class="p-3 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-200">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                            </div>
-                            <h3 class="text-xl font-black text-slate-800 tracking-tight">TAMBAH</h3>
-                        </div>
-
+                <div class="lg:col-span-4">
+                    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-10 sticky top-8">
+                        <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tighter italic mb-8">Register Marketing</h3>
                         <form action="{{ route('marketing.store') }}" method="POST" class="space-y-6">
                             @csrf
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nama Lengkap</label>
-                                <input type="text" name="nama" class="w-full bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 placeholder-slate-300 text-sm font-semibold p-4" placeholder="Input nama marketing..." required>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Nama Lengkap</label>
+                                <input type="text" name="nama" class="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold text-sm shadow-inner focus:ring-2 focus:ring-blue-600 uppercase italic placeholder-slate-300" placeholder="Input Nama..." required>
                             </div>
 
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Pilih Level</label>
-                                <div class="grid grid-cols-3 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Nomor Kartu Tol</label>
+                                <input type="text" name="no_kartu_tol" class="w-full bg-slate-50 border-none rounded-2xl p-4 font-black text-blue-700 text-sm shadow-inner focus:ring-2 focus:ring-blue-600 italic tracking-widest placeholder-slate-300" placeholder="Contoh: 1234...">
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Level Jabatan</label>
+                                <div class="grid grid-cols-3 gap-2">
                                     @foreach([1, 2, 3] as $l)
                                     <label class="cursor-pointer group">
                                         <input type="radio" name="level" value="{{ $l }}" class="hidden peer" required>
-                                        <div class="text-center p-3 rounded-xl border border-slate-100 bg-slate-50 group-hover:bg-white peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:shadow-lg peer-checked:shadow-indigo-200 transition-all font-bold text-slate-400">
+                                        <div class="text-center py-4 rounded-2xl border-2 border-slate-50 bg-slate-50 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-checked:text-white transition-all font-black text-slate-300 italic">
                                             {{ $l }}
                                         </div>
                                     </label>
@@ -157,8 +160,8 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full py-4 bg-slate-900 text-white rounded-xl font-bold shadow-lg shadow-slate-300 hover:bg-indigo-600 hover:-translate-y-1 transition-all">
-                                SIMPAN DATA
+                            <button type="submit" class="w-full py-5 bg-slate-900 text-white rounded-3xl font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-blue-600 transition-all italic text-[10px]">
+                                Daftarkan Personel
                             </button>
                         </form>
                     </div>
@@ -166,5 +169,48 @@
 
             </div>
         </div>
+
+        <div x-show="showTarifModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-cloak>
+            <div class="bg-white rounded-[3rem] shadow-2xl max-w-md w-full p-10 border-t-8 border-blue-600" @click.away="showTarifModal = false">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter">Add Master Tarif</h3>
+                    <button @click="showTarifModal = false" class="text-slate-400 hover:text-slate-800">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <form action="{{ route('marketing.store-tarif') }}" method="POST" class="space-y-5" x-data="{ n: '' }">
+                    @csrf
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Kategori</label>
+                        <input type="text" name="kategori" placeholder="HOTEL / UM" class="w-full rounded-2xl border-none bg-slate-50 p-4 font-black shadow-inner uppercase text-xs italic" required>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Wilayah</label>
+                        <input type="text" name="wilayah" placeholder="JABOTABEK / LAINNYA" class="w-full rounded-2xl border-none bg-slate-50 p-4 font-black shadow-inner uppercase text-xs italic" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Level</label>
+                            <select name="level" class="w-full rounded-2xl border-none bg-slate-50 p-4 font-black text-xs appearance-none shadow-inner">
+                                <option value="1">Lvl 1</option><option value="2">Lvl 2</option><option value="3">Lvl 3</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-blue-600 uppercase tracking-widest italic ml-1">Nominal (Rp)</label>
+                            <input type="text" x-model="n" @input="n = n.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" placeholder="0" class="w-full rounded-2xl border-none bg-blue-50 p-4 font-black italic shadow-inner text-blue-700 text-sm" required>
+                            <input type="hidden" name="nominal" :value="n.replace(/\./g, '')">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-5 bg-blue-600 text-white rounded-3xl font-black uppercase tracking-widest italic text-[10px] mt-4 shadow-xl shadow-blue-200">
+                        SIMPAN MASTER TARIF
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </x-app-layout>

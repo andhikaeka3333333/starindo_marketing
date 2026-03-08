@@ -23,6 +23,7 @@
                                 'label' => 'Omset',
                                 'icon' => 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', // Icon Trending Up/Omset
                             ],
+
                             [
                                 'route' => 'biaya-perjalanan.index',
                                 'label' => 'Perjalanan',
@@ -85,7 +86,7 @@
                     </div>
 
                     {{-- Dropdown Kendaraan --}}
-                    <div class="relative" @click.away="openKendaraan = false">
+                    {{-- <div class="relative" @click.away="openKendaraan = false">
                         <button @click="openKendaraan = !openKendaraan"
                             class="group inline-flex items-center px-4 py-2 text-xs font-bold tracking-[0.1em] uppercase transition-all duration-300 rounded-lg
                                 {{ request()->routeIs('toll.*') || request()->routeIs('bensin.*')
@@ -117,7 +118,7 @@
                             <a href="{{ route('bensin.index') }}"
                                 class="block px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-slate-300 hover:bg-blue-600/20 hover:text-blue-400 transition-colors">Bensin</a>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 
