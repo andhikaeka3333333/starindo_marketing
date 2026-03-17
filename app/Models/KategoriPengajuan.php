@@ -12,3 +12,4 @@ class KategoriPengajuan extends Model
         return $this->hasMany(Pengajuan::class);
     }
 }
+    

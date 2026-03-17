@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Marketing extends Model
 {
-    protected $fillable = ['nama', 'level', 'no_kartu_tol'];
+    protected $fillable = ['nama', 'level', 'no_kartu_tol', 'sisa_saldo_tol'];
 
     public function biayaAkomodasi() { return $this->hasMany(BiayaAkomodasi::class); }
     public function biayaOperasional() { return $this->hasMany(BiayaOperasional::class); }

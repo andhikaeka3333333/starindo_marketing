@@ -15,7 +15,7 @@ class BiayaPerjalananController extends Controller
     {
         $search = $request->query('search');
 
-        // 1. Query Akomodasi (Search: Marketing, Customer, CP, Kategori, Wilayah)
+        // 1. Query Akomodasi
         $akomodasi = BiayaAkomodasi::with('marketing')
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
@@ -28,7 +28,7 @@ class BiayaPerjalananController extends Controller
             })
             ->latest()->paginate(10, ['*'], 'page_akom');
 
-        // 2. Query Operasional (Search: Marketing, Customer, CP, Kategori, Keterangan)
+        // 2. Query Operasional
         $operasional = BiayaOperasional::with('marketing')
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
@@ -41,7 +41,7 @@ class BiayaPerjalananController extends Controller
             })
             ->latest()->paginate(10, ['*'], 'page_oper');
 
-        // 3. Query Tol (Search: Marketing, Customer, CP, Kategori, Keterangan)
+        // 3. Query Tol (Ditambah pencarian nama_gerbang)
         $tol = BiayaTol::with('marketing')
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
@@ -49,12 +49,13 @@ class BiayaPerjalananController extends Controller
                         ->orWhere('customer_cp', 'like', "%{$search}%")
                         ->orWhere('kategori', 'like', "%{$search}%")
                         ->orWhere('keterangan', 'like', "%{$search}%")
+                        ->orWhere('nama_gerbang', 'like', "%{$search}%")
                         ->orWhereHas('marketing', fn($m) => $m->where('nama', 'like', "%{$search}%"));
                 });
             })
             ->latest()->paginate(10, ['*'], 'page_tol');
 
-        // 4. Query Bensin (Search: Marketing, Customer, CP, Keterangan, KM)
+        // 4. Query Bensin
         $bensin = BiayaBensin::with('marketing')
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
@@ -86,7 +87,7 @@ class BiayaPerjalananController extends Controller
     }
 
     /**
-     * Menyimpan data ke tabel Temp berdasarkan kategori (Amfibi logic).
+     * Menyimpan data ke tabel Temp berdasarkan kategori.
      */
     public function storeTemp(Request $request)
     {
@@ -110,12 +111,14 @@ class BiayaPerjalananController extends Controller
                 'nominal' => ($tarif->nominal ?? 0) * ($request->durasi ?? 1),
             ]);
         } elseif (in_array($kat, ['Top-Up Tol', 'Pemakaian Tol'])) {
+            // Modifikasi: Tambahkan nama_gerbang
             TempTol::create([
                 'marketing_id' => $request->marketing_id,
-                'tanggal' => $request->tanggal,
+                'tanggal' => $request->tanggal, // format dari view: Y-m-d\TH:i
                 'customer_nama' => $request->customer_nama,
                 'customer_cp' => $request->customer_cp,
                 'kategori' => $kat,
+                'nama_gerbang' => $kat === 'Pemakaian Tol' ? $request->nama_gerbang : null,
                 'keterangan' => $request->keterangan,
                 'nominal' => $cleanNominal,
             ]);
@@ -144,18 +147,56 @@ class BiayaPerjalananController extends Controller
         return back()->with('success', 'Data draf berhasil ditambahkan.');
     }
 
-    /**
-     * Memindahkan semua data dari Temp ke Tabel Resmi (Finalize).
-     */
     public function finalize()
     {
         DB::transaction(function () {
-            foreach (TempAkomodasi::all() as $t) { BiayaAkomodasi::create($t->toArray()); $t->delete(); }
-            foreach (TempOperasional::all() as $t) { BiayaOperasional::create($t->toArray()); $t->delete(); }
-            foreach (TempTol::all() as $t) { BiayaTol::create($t->toArray()); $t->delete(); }
-            foreach (TempBensin::all() as $t) { BiayaBensin::create($t->toArray()); $t->delete(); }
+            $categories = [
+                ['temp' => \App\Models\TempAkomodasi::class, 'resmi' => \App\Models\BiayaAkomodasi::class],
+                ['temp' => \App\Models\TempOperasional::class, 'resmi' => \App\Models\BiayaOperasional::class],
+                ['temp' => \App\Models\TempTol::class, 'resmi' => \App\Models\BiayaTol::class],
+                ['temp' => \App\Models\TempBensin::class, 'resmi' => \App\Models\BiayaBensin::class],
+            ];
+
+            $now = now();
+
+            foreach ($categories as $cat) {
+                $tempModel = $cat['temp'];
+                $resmiModel = $cat['resmi'];
+
+                $data = $tempModel::all();
+
+                if ($data->isNotEmpty()) {
+                    foreach ($data as $item) {
+                        $attr = $item->getAttributes();
+                        unset($attr['id']);
+
+                        $attr['created_at'] = $attr['created_at'] ?? $now;
+                        $attr['updated_at'] = $attr['updated_at'] ?? $now;
+
+                        // LOGIKA UPDATE SALDO TOL MARKETING
+                        if ($tempModel === \App\Models\TempTol::class) {
+                            $marketing = Marketing::find($item->marketing_id);
+                            if ($marketing) {
+                                if ($item->kategori === 'Top-Up Tol') {
+                                    $marketing->increment('sisa_saldo_tol', $item->nominal);
+                                } elseif ($item->kategori === 'Pemakaian Tol') {
+                                    $marketing->decrement('sisa_saldo_tol', $item->nominal);
+                                }
+                            }
+                        }
+
+                        // Gunakan create agar tetap melewati mass assignment protection jika diperlukan
+                        $resmiModel::create($attr);
+                    }
+
+                    // Hapus data temp setelah dipindahkan
+                    $tempModel::query()->delete();
+                }
+            }
         });
-        return redirect()->route('biaya-perjalanan.index')->with('success', 'Finalisasi sukses! Data sudah resmi.');
+
+        return redirect()->route('biaya-perjalanan.index')
+            ->with('success', 'Finalisasi sukses! Data dipindahkan dan saldo tol marketing telah diperbarui.');
     }
 
     /**
@@ -192,7 +233,12 @@ class BiayaPerjalananController extends Controller
             $data->update(array_merge($request->all(), ['nominal' => $nominalBaru]));
         } elseif ($type === 'tol') {
             $data = BiayaTol::findOrFail($id);
-            $data->update(array_merge($request->all(), ['nominal' => $cleanNominal]));
+            // Catatan: Jika update data resmi, idealnya ada penyesuaian saldo ulang,
+            // namun di sini saya fokus pada update kolom sesuai request.
+            $data->update(array_merge($request->all(), [
+                'nominal' => $cleanNominal,
+                'nama_gerbang' => $request->kategori === 'Pemakaian Tol' ? $request->nama_gerbang : null
+            ]));
         } elseif ($type === 'bensin') {
             $data = BiayaBensin::findOrFail($id);
             $data->update(array_merge($request->all(), ['nominal' => $cleanNominal]));
@@ -226,5 +272,101 @@ class BiayaPerjalananController extends Controller
         elseif ($type === 'tol') TempTol::destroy($id);
         elseif ($type === 'bensin') TempBensin::destroy($id);
         return back()->with('success', 'Draf berhasil dihapus.');
+    }
+
+    /**
+     * Menampilkan halaman edit untuk draf (Temp) dengan semua kolom.
+     */
+    public function editTemp($type, $id)
+    {
+        $marketings = Marketing::all();
+        $rates = DB::table('tarif_perjalanan')->get();
+
+        $modelMap = [
+            'akomodasi' => TempAkomodasi::class,
+            'operasional' => TempOperasional::class,
+            'tol' => TempTol::class,
+            'bensin' => TempBensin::class,
+        ];
+
+        if (!isset($modelMap[$type])) abort(404);
+
+        $data = $modelMap[$type]::with('marketing')->findOrFail($id);
+
+        return view('biaya_perjalanan.edit_temp', compact('data', 'type', 'marketings', 'rates'));
+    }
+
+    /**
+     * Update semua kolom draf (Temp).
+     */
+    public function updateTemp(Request $request, $type, $id)
+    {
+        $cleanNominal = (int) str_replace('.', '', $request->nominal_value ?? $request->nominal ?? 0);
+
+        $modelMap = [
+            'akomodasi' => TempAkomodasi::class,
+            'operasional' => TempOperasional::class,
+            'tol' => TempTol::class,
+            'bensin' => TempBensin::class,
+        ];
+
+        $data = $modelMap[$type]::findOrFail($id);
+
+        if ($type === 'akomodasi') {
+            $tarif = DB::table('tarif_perjalanan')
+                ->where('kategori', $request->kategori)
+                ->where('level', $request->level)
+                ->where('wilayah', $request->wilayah)->first();
+
+            $nominalBaru = ($tarif->nominal ?? 0) * ($request->durasi ?? 1);
+
+            $data->update([
+                'marketing_id'  => $request->marketing_id,
+                'tanggal'       => $request->tanggal,
+                'customer_nama' => $request->customer_nama,
+                'customer_cp'   => $request->customer_cp,
+                'kategori'      => $request->kategori,
+                'level'         => $request->level,
+                'wilayah'       => $request->wilayah,
+                'durasi'        => $request->durasi,
+                'nominal'       => $nominalBaru,
+            ]);
+        }
+        elseif ($type === 'bensin') {
+            $data->update([
+                'marketing_id'  => $request->marketing_id,
+                'tanggal'       => $request->tanggal,
+                'customer_nama' => $request->customer_nama,
+                'customer_cp'   => $request->customer_cp,
+                'km'            => $request->km,
+                'keterangan'    => $request->keterangan,
+                'nominal'       => $cleanNominal,
+            ]);
+        }
+        elseif ($type === 'tol') {
+            // Modifikasi: Update Nama Gerbang di tabel Temp
+            $data->update([
+                'marketing_id'  => $request->marketing_id,
+                'tanggal'       => $request->tanggal,
+                'customer_nama' => $request->customer_nama,
+                'customer_cp'   => $request->customer_cp,
+                'kategori'      => $request->kategori,
+                'nama_gerbang'  => $request->kategori === 'Pemakaian Tol' ? $request->nama_gerbang : null,
+                'keterangan'    => $request->keterangan,
+                'nominal'       => $cleanNominal,
+            ]);
+        }
+        else {
+            $data->update([
+                'marketing_id'  => $request->marketing_id,
+                'tanggal'       => $request->tanggal,
+                'customer_nama' => $request->customer_nama,
+                'customer_cp'   => $request->customer_cp,
+                'keterangan'    => $request->keterangan,
+                'nominal'       => $cleanNominal,
+            ]);
+        }
+
+        return redirect()->route('biaya-perjalanan.create')->with('success', 'Draf berhasil diperbarui secara lengkap.');
     }
 }

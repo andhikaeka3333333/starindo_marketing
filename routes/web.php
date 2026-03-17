@@ -37,9 +37,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/finalize', [BiayaPerjalananController::class, 'finalize'])->name('biaya-perjalanan.finalize');
 
         // Edit & Update untuk Data Draf (Temp)
-        Route::get('/temp/{type}/{id}/edit', [BiayaPerjalananController::class, 'editTemp'])->name('biaya-perjalanan.editTemp');
-        Route::put('/temp/{type}/{id}', [BiayaPerjalananController::class, 'updateTemp'])->name('biaya-perjalanan.updateTemp');
         Route::delete('/temp/{type}/{id}', [BiayaPerjalananController::class, 'destroyTemp'])->name('biaya-perjalanan.destroyTemp');
+
+        Route::get('/edit-temp/{type}/{id}', [BiayaPerjalananController::class, 'editTemp'])->name('biaya-perjalanan.editTemp');
+        Route::put('/update-temp/{type}/{id}', [BiayaPerjalananController::class, 'updateTemp'])->name('biaya-perjalanan.updateTemp');
 
         // Edit & Update untuk Data Resmi (Final)
         Route::get('/{type}/{id}/edit', [BiayaPerjalananController::class, 'edit'])->name('biaya-perjalanan.edit');

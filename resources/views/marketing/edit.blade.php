@@ -29,6 +29,20 @@
                                class="w-full bg-slate-50 border-none rounded-2xl p-4 font-black text-indigo-600 shadow-inner focus:ring-2 focus:ring-blue-600" placeholder="Contoh: 1234...">
                     </div>
 
+                    <div class="space-y-2" x-data="{
+                        s: '{{ number_format(old('sisa_saldo_tol', $marketing->sisa_saldo_tol), 0, ',', '.') }}',
+                        formatRupiah(val) {
+                            if (!val) return '';
+                            let angka = val.toString().replace(/\D/g, '');
+                            return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        }
+                    }">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Sisa Saldo Tol (Rp)</label>
+                        <input type="text" x-model="s" @input="s = formatRupiah($event.target.value)"
+                               class="w-full bg-slate-50 border-none rounded-2xl p-4 font-black text-indigo-600 shadow-inner focus:ring-2 focus:ring-blue-600" placeholder="0">
+                        <input type="hidden" name="sisa_saldo_tol" :value="s.replace(/\./g, '')">
+                    </div>
+
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Level Jabatan</label>
                         <div class="grid grid-cols-3 gap-3">

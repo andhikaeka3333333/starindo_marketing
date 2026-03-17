@@ -40,7 +40,8 @@ class MarketingController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'level' => 'required|in:1,2,3',
-            'no_kartu_tol' => 'nullable|string'
+            'no_kartu_tol' => 'nullable|string',
+            'sisa_saldo_tol' => 'nullable|numeric'
         ]);
 
         Marketing::create($request->all());
@@ -61,7 +62,8 @@ class MarketingController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'level' => 'required|in:1,2,3',
-            'no_kartu_tol' => 'nullable|string'
+            'no_kartu_tol' => 'nullable|string',
+            'sisa_saldo_tol' => 'nullable|numeric'
         ]);
 
         $marketing->update($request->all());

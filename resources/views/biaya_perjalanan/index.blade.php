@@ -9,7 +9,7 @@
         </div>
     </x-slot>
 
-    <div class="py-8 bg-slate-50 min-h-screen" x-data="{ tab: 'akom' }">
+    <div class="py-8 bg-slate-50 min-h-screen" x-data="{ tab: '{{ request('tab', 'akom') }}' }">
         <div class="max-w-[1400px] mx-auto px-4">
 
             @if(session('success'))
@@ -20,10 +20,11 @@
 
             <div class="mb-8 max-w-2xl">
                 <form action="{{ url()->current() }}" method="GET" class="flex gap-3">
+                    <input type="hidden" name="tab" :value="tab">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Marketing, Customer, atau Kategori..." class="block w-full pl-6 pr-4 py-3 border-none bg-white rounded-2xl text-sm shadow-sm focus:ring-2 focus:ring-indigo-50 transition-all font-bold">
                     <button type="submit" class="bg-slate-800 text-white px-8 py-3 rounded-2xl text-xs font-black uppercase shadow-lg">Cari</button>
                     @if(request('search'))
-                        <a href="{{ url()->current() }}" class="flex items-center text-slate-400 hover:text-red-600 transition-all px-2">
+                        <a href="{{ url()->current() }}?tab={{ request('tab', 'akom') }}" class="flex items-center text-slate-400 hover:text-red-600 transition-all px-2">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M6 18L18 6M6 6l12 12"></path></svg>
                         </a>
                     @endif
@@ -33,22 +34,22 @@
             <div class="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200">
 
                 <div class="flex items-center bg-slate-100 border-b border-slate-200 pt-3 px-8 gap-1 overflow-x-auto whitespace-nowrap scrollbar-hide">
-                    <button @click="tab = 'akom'"
+                    <button @click="tab = 'akom'; window.history.replaceState(null, null, '?tab=akom&search={{ request('search') }}')"
                         :class="tab === 'akom' ? 'bg-white border-l border-r border-t border-slate-200 text-indigo-600 font-black rounded-t-2xl -mb-[1px]' : 'text-slate-400 hover:text-indigo-600 font-bold'"
                         class="px-8 py-4 text-[10px] uppercase tracking-widest transition-all">
                         Hotel & UM ({{ $akomodasi->total() }})
                     </button>
-                    <button @click="tab = 'tol'"
+                    <button @click="tab = 'tol'; window.history.replaceState(null, null, '?tab=tol&search={{ request('search') }}')"
                         :class="tab === 'tol' ? 'bg-white border-l border-r border-t border-slate-200 text-amber-600 font-black rounded-t-2xl -mb-[1px]' : 'text-slate-400 hover:text-amber-600 font-bold'"
                         class="px-8 py-4 text-[10px] uppercase tracking-widest transition-all">
                         Tol ({{ $tol->total() }})
                     </button>
-                    <button @click="tab = 'bensin'"
+                    <button @click="tab = 'bensin'; window.history.replaceState(null, null, '?tab=bensin&search={{ request('search') }}')"
                         :class="tab === 'bensin' ? 'bg-white border-l border-r border-t border-slate-200 text-emerald-600 font-black rounded-t-2xl -mb-[1px]' : 'text-slate-400 hover:text-emerald-600 font-bold'"
                         class="px-8 py-4 text-[10px] uppercase tracking-widest transition-all">
                         Bensin ({{ $bensin->total() }})
                     </button>
-                    <button @click="tab = 'oper'"
+                    <button @click="tab = 'oper'; window.history.replaceState(null, null, '?tab=oper&search={{ request('search') }}')"
                         :class="tab === 'oper' ? 'bg-white border-l border-r border-t border-slate-200 text-indigo-600 font-black rounded-t-2xl -mb-[1px]' : 'text-slate-400 hover:text-indigo-600 font-bold'"
                         class="px-8 py-4 text-[10px] uppercase tracking-widest transition-all">
                         Lainnya ({{ $operasional->total() }})
@@ -94,7 +95,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        <div class="mt-6">{{ $akomodasi->appends(request()->all())->links() }}</div>
+                        <div class="mt-6">{{ $akomodasi->appends(['tab' => 'akom', 'search' => request('search')])->links() }}</div>
                     </div>
 
                     <div x-show="tab === 'tol'" x-cloak>
@@ -134,7 +135,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        <div class="mt-6">{{ $tol->appends(request()->all())->links() }}</div>
+                        <div class="mt-6">{{ $tol->appends(['tab' => 'tol', 'search' => request('search')])->links() }}</div>
                     </div>
 
                     <div x-show="tab === 'bensin'" x-cloak>
@@ -173,7 +174,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        <div class="mt-6">{{ $bensin->appends(request()->all())->links() }}</div>
+                        <div class="mt-6">{{ $bensin->appends(['tab' => 'bensin', 'search' => request('search')])->links() }}</div>
                     </div>
 
                     <div x-show="tab === 'oper'" x-cloak>
@@ -212,7 +213,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        <div class="mt-6">{{ $operasional->appends(request()->all())->links() }}</div>
+                        <div class="mt-6">{{ $operasional->appends(['tab' => 'oper', 'search' => request('search')])->links() }}</div>
                     </div>
 
                 </div>

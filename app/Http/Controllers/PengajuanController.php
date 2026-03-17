@@ -64,11 +64,14 @@ class PengajuanController extends Controller
     public function update(Request $request, Pengajuan $pengajuan)
     {
         $data = $request->validate([
-            'marketing_id'          => 'required',
-            'kategori_pengajuan_id' => 'required',
+            'marketing_id'          => 'required|exists:marketings,id',
+            'kategori_pengajuan_id' => 'required|exists:kategori_pengajuans,id',
             'tanggal'               => 'required|date',
             'customer_nama'         => 'required|string',
             'nominal_value'         => 'required|numeric',
+            'customer_cp'           => 'nullable',
+            'customer_alamat'       => 'nullable',
+            'alamat'                => 'nullable',
         ]);
 
         $pengajuan->update($data);

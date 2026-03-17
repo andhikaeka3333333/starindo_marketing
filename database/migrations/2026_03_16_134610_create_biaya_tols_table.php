@@ -16,10 +16,11 @@ return new class extends Migration
         Schema::create('biaya_tols', function (Blueprint $table) {
             $table->id();
             $table->foreignId('marketing_id')->constrained('marketings')->onDelete('cascade');
-            $table->date('tanggal');
+            $table->dateTime('tanggal');
             $table->string('customer_nama')->nullable();
             $table->string('customer_cp')->nullable();
             $table->enum('kategori', ['Top-Up Tol', 'Pemakaian Tol']);
+            $table->string('nama_gerbang')->nullable();
             $table->text('keterangan')->nullable();
             $table->decimal('nominal', 15, 2);
             $table->timestamps();
@@ -29,10 +30,11 @@ return new class extends Migration
         Schema::create('temp_tols', function (Blueprint $table) {
             $table->id();
             $table->foreignId('marketing_id')->constrained('marketings')->onDelete('cascade');
-            $table->date('tanggal');
+            $table->dateTime('tanggal');
             $table->string('customer_nama')->nullable();
             $table->string('customer_cp')->nullable();
             $table->enum('kategori', ['Top-Up Tol', 'Pemakaian Tol']);
+            $table->string('nama_gerbang')->nullable();
             $table->text('keterangan')->nullable();
             $table->decimal('nominal', 15, 2);
             $table->timestamps();
