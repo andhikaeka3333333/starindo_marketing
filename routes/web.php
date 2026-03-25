@@ -7,12 +7,14 @@ use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\OmsetController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RekapController;
 use App\Http\Controllers\TolController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
 
 
 Route::middleware(['auth'])->group(function () {
@@ -47,6 +49,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{type}/{id}', [BiayaPerjalananController::class, 'update'])->name('biaya-perjalanan.update');
         Route::delete('/{type}/{id}', [BiayaPerjalananController::class, 'destroy'])->name('biaya-perjalanan.destroy');
     });
+
+    Route::get('/rekap', [RekapController::class, 'index'])->name('rekap.index');
 
 
 

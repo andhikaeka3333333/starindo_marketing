@@ -22,7 +22,7 @@
         namaGerbang: '',
 
         init() {
-            // Watchers: Otomatis simpan ke browser setiap kali input berubah
+            // Watchers tetap sama
             this.$watch('marketingId', val => localStorage.setItem('last_marketing_id', val));
             this.$watch('customerNama', val => localStorage.setItem('last_customer_nama', val));
             this.$watch('customerCp', val => localStorage.setItem('last_customer_cp', val));
@@ -30,11 +30,18 @@
             this.$watch('km', val => localStorage.setItem('last_km', val));
             this.$watch('tanggalTransaksi', val => localStorage.setItem('last_tanggal', val));
 
-            // Auto switch tab berdasarkan kategori terakhir yang dipilih
-            if (['Hotel', 'UM'].includes(this.kategori)) this.tab = 'akom';
-            else if (['Top-Up Tol', 'Pemakaian Tol'].includes(this.kategori)) this.tab = 'tol';
-            else if (this.kategori === 'Bensin') this.tab = 'bensin';
-            else this.tab = 'oper';
+            // UBAH BAGIAN INI:
+            if (['Hotel', 'UM'].includes(this.kategori)) {
+                this.tab = 'akom';
+            } else if (this.kategori === 'Top-Up Tol') {
+                this.tab = 'topup'; // Arahkan ke tab topup
+            } else if (this.kategori === 'Pemakaian Tol') {
+                this.tab = 'pakai'; // Arahkan ke tab pakai
+            } else if (this.kategori === 'Bensin') {
+                this.tab = 'bensin';
+            } else {
+                this.tab = 'oper';
+            }
         },
 
         get selectedMarketing() {
@@ -300,12 +307,27 @@
                         class="px-6 py-2.5 text-[9px] uppercase tracking-widest transition-all italic">
                         Hotel & UM ({{ $tempAkomodasi->count() }})
                     </button>
-                    <button @click="tab = 'tol'"
+                    {{-- <button @click="tab = 'tol'"
                         :class="tab === 'tol' ?
                             'bg-white border-x border-t border-slate-200 text-amber-600 font-black rounded-t-xl -mb-[1px]' :
                             'text-slate-400 font-bold'"
                         class="px-6 py-2.5 text-[9px] uppercase tracking-widest transition-all italic">
                         Tol ({{ $tempTol->count() }})
+                    </button> --}}
+                    <button @click="tab = 'topup'"
+                        :class="tab === 'topup' ?
+                            'bg-white border-x border-t border-slate-200 text-amber-600 font-black rounded-t-xl -mb-[1px]' :
+                            'text-slate-400 font-bold'"
+                        class="px-6 py-2.5 text-[9px] uppercase tracking-widest transition-all italic">
+                        Top-Up Tol ({{ $tempTopUp->count() }})
+                    </button>
+
+                    <button @click="tab = 'pakai'"
+                        :class="tab === 'pakai' ?
+                            'bg-white border-x border-t border-slate-200 text-orange-600 font-black rounded-t-xl -mb-[1px]' :
+                            'text-slate-400 font-bold'"
+                        class="px-6 py-2.5 text-[9px] uppercase tracking-widest transition-all italic">
+                        Pemakaian Tol ({{ $tempPemakaian->count() }})
                     </button>
                     <button @click="tab = 'bensin'"
                         :class="tab === 'bensin' ?
@@ -324,14 +346,14 @@
                 </div>
 
                 <div class="p-6">
-                    <div x-show="tab === 'tol'" x-cloak class="overflow-x-auto">
+                    <div x-show="tab === 'topup'" x-cloak class="overflow-x-auto">
                         <table
                             class="w-full text-left text-[10px] whitespace-nowrap table-auto border-separate border-spacing-y-1">
                             <thead class="text-slate-400 uppercase font-black border-b border-slate-100">
                                 <tr>
                                     <th class="py-2 px-3">Tgl & Waktu</th>
                                     <th class="py-2 px-3">Marketing</th>
-                                    <th class="py-2 px-3">Gerbang Tol</th>
+                                    {{-- <th class="py-2 px-3">Gerbang Tol</th> --}}
                                     <th class="py-2 px-3">Customer</th>
                                     <th class="py-2 px-3">CP / Kontak</th>
                                     <th class="py-2 px-3">Kategori</th>
@@ -341,15 +363,15 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($tempTol as $t)
+                                @foreach ($tempTopUp as $t)
                                     <tr class="hover:bg-amber-50/50 transition bg-slate-50/20">
                                         <td class="py-2.5 px-3 font-bold text-slate-400">
                                             {{ date('d/m/y H:i', strtotime($t->tanggal)) }}</td>
                                         <td class="py-2.5 px-3 font-black uppercase ">{{ $t->marketing->nama }}
                                         </td>
-                                        <td
+                                        {{-- <td
                                             class="py-2.5 px-3 font-black text-amber-900  uppercase decoration-amber-200">
-                                            {{ $t->nama_gerbang ?? '-' }}</td>
+                                            {{ $t->nama_gerbang ?? '-' }}</td> --}}
                                         <td class="py-2.5 px-3 font-black text-slate-800 uppercase">
                                             {{ $t->customer_nama }}</td>
                                         <td class="py-2.5 px-3  text-slate-400">{{ $t->customer_cp ?? '-' }}
@@ -392,227 +414,297 @@
                         </table>
                     </div>
 
-                    <div x-show="tab === 'akom'" x-cloak class="overflow-x-auto">
-                        <table
-                            class="w-full text-left text-[10px] whitespace-nowrap table-auto border-separate border-spacing-y-1">
-                            <thead class="text-slate-400 uppercase font-black border-b border-slate-100">
-                                <tr>
-                                    <th class="py-2 px-3">Tgl</th>
-                                    <th class="py-2 px-3">Marketing</th>
-                                    <th class="py-2 px-3">Customer</th>
-                                    <th class="py-2 px-3">CP / Kontak</th>
-                                    <th class="py-2 px-3">Kategori</th>
-                                    <th class="py-2 px-3">Lvl</th>
-                                    <th class="py-2 px-3 text-center">Wilayah</th>
-                                    <th class="py-2 px-3 text-center">Durasi</th>
-                                    <th class="py-2 px-3 text-right">Total Nominal</th>
-                                    <th class="py-2 px-3 text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($tempAkomodasi as $t)
-                                    <tr class="hover:bg-blue-50/50 transition bg-slate-50/20">
-                                        <td class="py-2.5 px-3 font-bold text-slate-400">
-                                            {{ date('d/m/y', strtotime($t->tanggal)) }}</td>
-                                        <td class="py-2.5 px-3 font-black uppercase ">{{ $t->marketing->nama }}
-                                        </td>
-                                        <td class="py-2.5 px-3 font-black text-blue-600 uppercase">
-                                            {{ $t->customer_nama }}</td>
-                                        <td class="py-2.5 px-3  text-slate-400">{{ $t->customer_cp ?? '-' }}
-                                        </td>
-                                        <td class="py-2.5 px-3 font-bold  text-slate-700 uppercase">
-                                            {{ $t->kategori }}</td>
-                                        <td class="py-2.5 px-3 font-black text-indigo-600 uppercase">Lvl
-                                            {{ $t->level }}</td>
-                                        <td class="py-2.5 px-3 text-center font-bold uppercase text-slate-500">
-                                            {{ $t->wilayah }}</td>
-                                        <td class="py-2.5 px-3 text-center font-bold">{{ $t->durasi }} Hari/Malam
-                                        </td>
-                                        <td class="py-2.5 px-3 text-right font-black  text-slate-900">Rp
-                                            {{ number_format($t->nominal, 0, ',', '.') }}</td>
-                                        <td class="py-2.5 px-3 text-center">
-                                            <div class="flex items-center justify-center gap-3">
-                                                <a href="{{ route('biaya-perjalanan.editTemp', ['akomodasi', $t->id]) }}"
-                                                    class="text-blue-400 hover:text-blue-600 transition">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24" stroke-width="2">
-                                                        <path
-                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                                        </path>
-                                                    </svg>
-                                                </a>
-                                                <form
-                                                    action="{{ route('biaya-perjalanan.destroyTemp', ['akomodasi', $t->id]) }}"
-                                                    method="POST">@csrf @method('DELETE')<button type="submit"
-                                                        class="text-red-400 hover:text-red-600 transition"><svg
-                                                            class="w-4 h-4" fill="none" stroke="currentColor"
+                    <div class="p-6">
+                        <div x-show="tab === 'pakai'" x-cloak class="overflow-x-auto">
+                            <table
+                                class="w-full text-left text-[10px] whitespace-nowrap table-auto border-separate border-spacing-y-1">
+                                <thead class="text-slate-400 uppercase font-black border-b border-slate-100">
+                                    <tr>
+                                        <th class="py-2 px-3">Tgl & Waktu</th>
+                                        <th class="py-2 px-3">Marketing</th>
+                                        <th class="py-2 px-3">Gerbang Tol</th>
+                                        <th class="py-2 px-3">Customer</th>
+                                        <th class="py-2 px-3">CP / Kontak</th>
+                                        <th class="py-2 px-3">Kategori</th>
+                                        <th class="py-2 px-3">Keterangan</th>
+                                        <th class="py-2 px-3 text-right">Nominal</th>
+                                        <th class="py-2 px-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($tempPemakaian as $t)
+                                        <tr class="hover:bg-amber-50/50 transition bg-slate-50/20">
+                                            <td class="py-2.5 px-3 font-bold text-slate-400">
+                                                {{ date('d/m/y H:i', strtotime($t->tanggal)) }}</td>
+                                            <td class="py-2.5 px-3 font-black uppercase ">{{ $t->marketing->nama }}
+                                            </td>
+                                            <td
+                                                class="py-2.5 px-3 font-black text-amber-900  uppercase decoration-amber-200">
+                                                {{ $t->nama_gerbang ?? '-' }}</td>
+                                            <td class="py-2.5 px-3 font-black text-slate-800 uppercase">
+                                                {{ $t->customer_nama }}</td>
+                                            <td class="py-2.5 px-3  text-slate-400">{{ $t->customer_cp ?? '-' }}
+                                            </td>
+                                            <td class="py-2.5 px-3 font-bold text-amber-600  uppercase">
+                                                {{ $t->kategori }}</td>
+                                            <td class="py-2.5 px-3 font-medium text-slate-500 ">
+                                                {{ Str::limit($t->keterangan, 30) ?? '-' }}</td>
+                                            <td class="py-2.5 px-3 text-right font-black  text-slate-900">Rp
+                                                {{ number_format($t->nominal, 0, ',', '.') }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <div class="flex items-center justify-center gap-3">
+                                                    <a href="{{ route('biaya-perjalanan.editTemp', ['tol', $t->id]) }}"
+                                                        class="text-blue-400 hover:text-blue-600 transition">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24" stroke-width="2">
                                                             <path
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                                                             </path>
-                                                        </svg></button></form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                                        </svg>
+                                                    </a>
+                                                    <form
+                                                        action="{{ route('biaya-perjalanan.destroyTemp', ['tol', $t->id]) }}"
+                                                        method="POST" onsubmit="return confirm('Hapus draf ini?')">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit"
+                                                            class="text-red-400 hover:text-red-600 transition"><svg
+                                                                class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24" stroke-width="2">
+                                                                <path
+                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                </path>
+                                                            </svg></button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <div x-show="tab === 'bensin'" x-cloak class="overflow-x-auto">
-                        <table
-                            class="w-full text-left text-[10px] whitespace-nowrap table-auto border-separate border-spacing-y-1">
-                            <thead class="text-slate-400 uppercase font-black border-b border-slate-100">
-                                <tr>
-                                    <th class="py-2 px-3">Tgl</th>
-                                    <th class="py-2 px-3">Marketing</th>
-                                    <th class="py-2 px-3">Customer</th>
-                                    <th class="py-2 px-3">CP / Kontak</th>
-                                    <th class="py-2 px-3 text-center">Posisi KM</th>
-                                    <th class="py-2 px-3">Kategori</th>
-                                    <th class="py-2 px-3">Keterangan</th>
-                                    <th class="py-2 px-3 text-right">Nominal</th>
-                                    <th class="py-2 px-3 text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($tempBensin as $t)
-                                    <tr class="hover:bg-emerald-50/50 transition bg-slate-50/20">
-                                        <td class="py-2.5 px-3 font-bold text-slate-400">
-                                            {{ date('d/m/y', strtotime($t->tanggal)) }}</td>
-                                        <td class="py-2.5 px-3 font-black uppercase ">{{ $t->marketing->nama }}
-                                        </td>
-                                        <td class="py-2.5 px-3 font-black text-slate-800 uppercase">
-                                            {{ $t->customer_nama }}</td>
-                                        <td class="py-2.5 px-3  text-slate-400">{{ $t->customer_cp ?? '-' }}
-                                        </td>
-                                        <td class="py-2.5 px-3 text-center font-black text-emerald-700 ">
-                                            {{ number_format($t->km, 0, ',', '.') }} KM</td>
-                                        <td class="py-2.5 px-3 font-bold  text-emerald-600 uppercase">
-                                            {{ $t->kategori }}</td>
-                                        <td class="py-2.5 px-3 font-medium text-slate-500 ">
-                                            {{ Str::limit($t->keterangan, 30) ?? '-' }}</td>
-                                        <td class="py-2.5 px-3 text-right font-black  text-slate-900">Rp
-                                            {{ number_format($t->nominal, 0, ',', '.') }}</td>
-                                        <td class="py-2.5 px-3 text-center">
-                                            <div class="flex items-center justify-center gap-3">
-                                                <a href="{{ route('biaya-perjalanan.editTemp', ['bensin', $t->id]) }}"
-                                                    class="text-blue-400 hover:text-blue-600 transition">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24" stroke-width="2">
-                                                        <path
-                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                                        </path>
-                                                    </svg>
-                                                </a>
-                                                <form
-                                                    action="{{ route('biaya-perjalanan.destroyTemp', ['bensin', $t->id]) }}"
-                                                    method="POST">@csrf @method('DELETE')<button type="submit"
-                                                        class="text-red-400 hover:text-red-600 transition"><svg
-                                                            class="w-4 h-4" fill="none" stroke="currentColor"
+                        <div x-show="tab === 'akom'" x-cloak class="overflow-x-auto">
+                            <table
+                                class="w-full text-left text-[10px] whitespace-nowrap table-auto border-separate border-spacing-y-1">
+                                <thead class="text-slate-400 uppercase font-black border-b border-slate-100">
+                                    <tr>
+                                        <th class="py-2 px-3">Tgl</th>
+                                        <th class="py-2 px-3">Marketing</th>
+                                        <th class="py-2 px-3">Customer</th>
+                                        <th class="py-2 px-3">CP / Kontak</th>
+                                        <th class="py-2 px-3">Kategori</th>
+                                        <th class="py-2 px-3">Lvl</th>
+                                        <th class="py-2 px-3 text-center">Wilayah</th>
+                                        <th class="py-2 px-3 text-center">Durasi</th>
+                                        <th class="py-2 px-3 text-right">Total Nominal</th>
+                                        <th class="py-2 px-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($tempAkomodasi as $t)
+                                        <tr class="hover:bg-blue-50/50 transition bg-slate-50/20">
+                                            <td class="py-2.5 px-3 font-bold text-slate-400">
+                                                {{ date('d/m/y', strtotime($t->tanggal)) }}</td>
+                                            <td class="py-2.5 px-3 font-black uppercase ">{{ $t->marketing->nama }}
+                                            </td>
+                                            <td class="py-2.5 px-3 font-black text-blue-600 uppercase">
+                                                {{ $t->customer_nama }}</td>
+                                            <td class="py-2.5 px-3  text-slate-400">{{ $t->customer_cp ?? '-' }}
+                                            </td>
+                                            <td class="py-2.5 px-3 font-bold  text-slate-700 uppercase">
+                                                {{ $t->kategori }}</td>
+                                            <td class="py-2.5 px-3 font-black text-indigo-600 uppercase">Lvl
+                                                {{ $t->level }}</td>
+                                            <td class="py-2.5 px-3 text-center font-bold uppercase text-slate-500">
+                                                {{ $t->wilayah }}</td>
+                                            <td class="py-2.5 px-3 text-center font-bold">{{ $t->durasi }}
+                                                Hari/Malam
+                                            </td>
+                                            <td class="py-2.5 px-3 text-right font-black  text-slate-900">Rp
+                                                {{ number_format($t->nominal, 0, ',', '.') }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <div class="flex items-center justify-center gap-3">
+                                                    <a href="{{ route('biaya-perjalanan.editTemp', ['akomodasi', $t->id]) }}"
+                                                        class="text-blue-400 hover:text-blue-600 transition">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24" stroke-width="2">
                                                             <path
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                                                             </path>
-                                                        </svg></button></form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                                        </svg>
+                                                    </a>
+                                                    <form
+                                                        action="{{ route('biaya-perjalanan.destroyTemp', ['akomodasi', $t->id]) }}"
+                                                        method="POST">@csrf @method('DELETE')<button type="submit"
+                                                            class="text-red-400 hover:text-red-600 transition"><svg
+                                                                class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24" stroke-width="2">
+                                                                <path
+                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                </path>
+                                                            </svg></button></form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <div x-show="tab === 'oper'" x-cloak class="overflow-x-auto">
-                        <table
-                            class="w-full text-left text-[10px] whitespace-nowrap table-auto border-separate border-spacing-y-1">
-                            <thead class="text-slate-400 uppercase font-black border-b border-slate-100">
-                                <tr>
-                                    <th class="py-2 px-3">Tgl</th>
-                                    <th class="py-2 px-3">Marketing</th>
-                                    <th class="py-2 px-3">Customer</th>
-                                    <th class="py-2 px-3">CP / Kontak</th>
-                                    <th class="py-2 px-3">Kategori</th>
-                                    <th class="py-2 px-3">Keterangan</th>
-                                    <th class="py-2 px-3 text-right">Nominal</th>
-                                    <th class="py-2 px-3 text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($tempOperasional as $t)
-                                    <tr class="hover:bg-indigo-50/50 transition bg-slate-50/20">
-                                        <td class="py-2.5 px-3 font-bold text-slate-400">
-                                            {{ date('d/m/y', strtotime($t->tanggal)) }}</td>
-                                        <td class="py-2.5 px-3 font-black uppercase ">{{ $t->marketing->nama }}
-                                        </td>
-                                        <td class="py-2.5 px-3 font-black text-slate-800 uppercase">
-                                            {{ $t->customer_nama }}</td>
-                                        <td class="py-2.5 px-3  text-slate-400">{{ $t->customer_cp ?? '-' }}
-                                        </td>
-                                        <td class="py-2.5 px-3 font-bold  text-indigo-600 uppercase">
-                                            {{ $t->kategori }}</td>
-                                        <td class="py-2.5 px-3 font-medium text-slate-500 ">
-                                            {{ Str::limit($t->keterangan, 40) ?? '-' }}</td>
-                                        <td class="py-2.5 px-3 text-right font-black  text-slate-900">Rp
-                                            {{ number_format($t->nominal, 0, ',', '.') }}</td>
-                                        <td class="py-2.5 px-3 text-center">
-                                            <div class="flex items-center justify-center gap-3">
-                                                <a href="{{ route('biaya-perjalanan.editTemp', ['operasional', $t->id]) }}"
-                                                    class="text-blue-400 hover:text-blue-600 transition">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24" stroke-width="2">
-                                                        <path
-                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                                        </path>
-                                                    </svg>
-                                                </a>
-                                                <form
-                                                    action="{{ route('biaya-perjalanan.destroyTemp', ['operasional', $t->id]) }}"
-                                                    method="POST">@csrf @method('DELETE')<button type="submit"
-                                                        class="text-red-400 hover:text-red-600 transition"><svg
-                                                            class="w-4 h-4" fill="none" stroke="currentColor"
+                        <div x-show="tab === 'bensin'" x-cloak class="overflow-x-auto">
+                            <table
+                                class="w-full text-left text-[10px] whitespace-nowrap table-auto border-separate border-spacing-y-1">
+                                <thead class="text-slate-400 uppercase font-black border-b border-slate-100">
+                                    <tr>
+                                        <th class="py-2 px-3">Tgl</th>
+                                        <th class="py-2 px-3">Marketing</th>
+                                        <th class="py-2 px-3">Customer</th>
+                                        <th class="py-2 px-3">CP / Kontak</th>
+                                        <th class="py-2 px-3 text-center">Posisi KM</th>
+                                        <th class="py-2 px-3">Kategori</th>
+                                        <th class="py-2 px-3">Keterangan</th>
+                                        <th class="py-2 px-3 text-right">Nominal</th>
+                                        <th class="py-2 px-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($tempBensin as $t)
+                                        <tr class="hover:bg-emerald-50/50 transition bg-slate-50/20">
+                                            <td class="py-2.5 px-3 font-bold text-slate-400">
+                                                {{ date('d/m/y', strtotime($t->tanggal)) }}</td>
+                                            <td class="py-2.5 px-3 font-black uppercase ">{{ $t->marketing->nama }}
+                                            </td>
+                                            <td class="py-2.5 px-3 font-black text-slate-800 uppercase">
+                                                {{ $t->customer_nama }}</td>
+                                            <td class="py-2.5 px-3  text-slate-400">{{ $t->customer_cp ?? '-' }}
+                                            </td>
+                                            <td class="py-2.5 px-3 text-center font-black text-emerald-700 ">
+                                                {{ number_format($t->km, 0, ',', '.') }} KM</td>
+                                            <td class="py-2.5 px-3 font-bold  text-emerald-600 uppercase">
+                                                {{ $t->kategori }}</td>
+                                            <td class="py-2.5 px-3 font-medium text-slate-500 ">
+                                                {{ Str::limit($t->keterangan, 30) ?? '-' }}</td>
+                                            <td class="py-2.5 px-3 text-right font-black  text-slate-900">Rp
+                                                {{ number_format($t->nominal, 0, ',', '.') }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <div class="flex items-center justify-center gap-3">
+                                                    <a href="{{ route('biaya-perjalanan.editTemp', ['bensin', $t->id]) }}"
+                                                        class="text-blue-400 hover:text-blue-600 transition">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24" stroke-width="2">
                                                             <path
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                                                             </path>
-                                                        </svg></button></form>
-                                            </div>
-                                        </td>
+                                                        </svg>
+                                                    </a>
+                                                    <form
+                                                        action="{{ route('biaya-perjalanan.destroyTemp', ['bensin', $t->id]) }}"
+                                                        method="POST">@csrf @method('DELETE')<button type="submit"
+                                                            class="text-red-400 hover:text-red-600 transition"><svg
+                                                                class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24" stroke-width="2">
+                                                                <path
+                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                </path>
+                                                            </svg></button></form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div x-show="tab === 'oper'" x-cloak class="overflow-x-auto">
+                            <table
+                                class="w-full text-left text-[10px] whitespace-nowrap table-auto border-separate border-spacing-y-1">
+                                <thead class="text-slate-400 uppercase font-black border-b border-slate-100">
+                                    <tr>
+                                        <th class="py-2 px-3">Tgl</th>
+                                        <th class="py-2 px-3">Marketing</th>
+                                        <th class="py-2 px-3">Customer</th>
+                                        <th class="py-2 px-3">CP / Kontak</th>
+                                        <th class="py-2 px-3">Kategori</th>
+                                        <th class="py-2 px-3">Keterangan</th>
+                                        <th class="py-2 px-3 text-right">Nominal</th>
+                                        <th class="py-2 px-3 text-center">Aksi</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($tempOperasional as $t)
+                                        <tr class="hover:bg-indigo-50/50 transition bg-slate-50/20">
+                                            <td class="py-2.5 px-3 font-bold text-slate-400">
+                                                {{ date('d/m/y', strtotime($t->tanggal)) }}</td>
+                                            <td class="py-2.5 px-3 font-black uppercase ">{{ $t->marketing->nama }}
+                                            </td>
+                                            <td class="py-2.5 px-3 font-black text-slate-800 uppercase">
+                                                {{ $t->customer_nama }}</td>
+                                            <td class="py-2.5 px-3  text-slate-400">{{ $t->customer_cp ?? '-' }}
+                                            </td>
+                                            <td class="py-2.5 px-3 font-bold  text-indigo-600 uppercase">
+                                                {{ $t->kategori }}</td>
+                                            <td class="py-2.5 px-3 font-medium text-slate-500 ">
+                                                {{ Str::limit($t->keterangan, 40) ?? '-' }}</td>
+                                            <td class="py-2.5 px-3 text-right font-black  text-slate-900">Rp
+                                                {{ number_format($t->nominal, 0, ',', '.') }}</td>
+                                            <td class="py-2.5 px-3 text-center">
+                                                <div class="flex items-center justify-center gap-3">
+                                                    <a href="{{ route('biaya-perjalanan.editTemp', ['operasional', $t->id]) }}"
+                                                        class="text-blue-400 hover:text-blue-600 transition">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24" stroke-width="2">
+                                                            <path
+                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                            </path>
+                                                        </svg>
+                                                    </a>
+                                                    <form
+                                                        action="{{ route('biaya-perjalanan.destroyTemp', ['operasional', $t->id]) }}"
+                                                        method="POST">@csrf @method('DELETE')<button type="submit"
+                                                            class="text-red-400 hover:text-red-600 transition"><svg
+                                                                class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24" stroke-width="2">
+                                                                <path
+                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                </path>
+                                                            </svg></button></form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @php
+                            $totalTemp =
+                                $tempAkomodasi->count() +
+                                $tempTol->count() +
+                                $tempBensin->count() +
+                                $tempOperasional->count();
+                        @endphp
+
+                        @if ($totalTemp > 0)
+                            <form action="{{ route('biaya-perjalanan.finalize') }}" method="POST" class="mt-8"
+                                @submit="finalizing = true">
+                                @csrf
+                                <button type="submit" :disabled="finalizing"
+                                    class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-blue-600 transition uppercase tracking-widest  text-[10px] flex items-center justify-center gap-2">
+                                    <svg x-show="finalizing" class="animate-spin h-3 w-3 text-white" fill="none"
+                                        viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                    <span
+                                        x-text="finalizing ? 'MENERBITKAN DATA RESMI...' : 'FINALISASI: SIMPAN PERMANEN SEMUA DRAF'"></span>
+                                </button>
+                            </form>
+                        @endif
                     </div>
-
-                    @php
-                        $totalTemp =
-                            $tempAkomodasi->count() +
-                            $tempTol->count() +
-                            $tempBensin->count() +
-                            $tempOperasional->count();
-                    @endphp
-
-                    @if ($totalTemp > 0)
-                        <form action="{{ route('biaya-perjalanan.finalize') }}" method="POST" class="mt-8"
-                            @submit="finalizing = true">
-                            @csrf
-                            <button type="submit" :disabled="finalizing"
-                                class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-blue-600 transition uppercase tracking-widest  text-[10px] flex items-center justify-center gap-2">
-                                <svg x-show="finalizing" class="animate-spin h-3 w-3 text-white" fill="none"
-                                    viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                        stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                    </path>
-                                </svg>
-                                <span
-                                    x-text="finalizing ? 'MENERBITKAN DATA RESMI...' : 'FINALISASI: SIMPAN PERMANEN SEMUA DRAF'"></span>
-                            </button>
-                        </form>
-                    @endif
                 </div>
             </div>
         </div>
-    </div>
 </x-app-layout>

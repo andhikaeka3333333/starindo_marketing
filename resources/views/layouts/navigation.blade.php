@@ -21,13 +21,18 @@
                             [
                                 'route' => 'omset.index',
                                 'label' => 'Omset',
-                                'icon' => 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', // Icon Trending Up/Omset
+                                'icon' => 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
                             ],
-
                             [
                                 'route' => 'biaya-perjalanan.index',
                                 'label' => 'Perjalanan',
-                                'icon' => 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z',
+                                // 'icon' => 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z',
+                                'icon' => 'M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12',
+                            ],
+                            [
+                                'route' => 'rekap.index',
+                                'label' => 'Rekap',
+                                'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
                             ],
                         ];
                     @endphp
@@ -84,41 +89,6 @@
                             </a>
                         </div>
                     </div>
-
-                    {{-- Dropdown Kendaraan --}}
-                    {{-- <div class="relative" @click.away="openKendaraan = false">
-                        <button @click="openKendaraan = !openKendaraan"
-                            class="group inline-flex items-center px-4 py-2 text-xs font-bold tracking-[0.1em] uppercase transition-all duration-300 rounded-lg
-                                {{ request()->routeIs('toll.*') || request()->routeIs('bensin.*')
-                                    ? 'bg-blue-600/10 text-blue-400 shadow-[inset_0_0_20px_rgba(37,99,235,0.1)]'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
-                            <svg class="w-4 h-4 mr-2 opacity-70 group-hover:opacity-100 transition-opacity"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1m-4 0a1 1 0 001 1h1">
-                                </path>
-                            </svg>
-                            Kendaraan
-                            <svg class="w-3 h-3 ml-2 transition-transform duration-300"
-                                :class="openKendaraan ? 'rotate-180' : ''" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-
-                        <div x-show="openKendaraan" x-cloak x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-75"
-                            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute left-0 mt-2 w-48 rounded-xl bg-[#1e293b] border border-white/10 shadow-2xl py-2 z-50">
-                            <a href="{{ route('toll.index') }}"
-                                class="block px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-slate-300 hover:bg-blue-600/20 hover:text-blue-400 transition-colors">Biaya
-                                Tol</a>
-                            <a href="{{ route('bensin.index') }}"
-                                class="block px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-slate-300 hover:bg-blue-600/20 hover:text-blue-400 transition-colors">Bensin</a>
-                        </div>
-                    </div> --}}
                 </div>
             </div>
 
@@ -194,7 +164,6 @@
             @endforeach
 
             {{-- Mobile Dropdowns --}}
-            {{-- (Pengajuan & Kendaraan Mobile tetap sama) --}}
             <div x-data="{ localPengajuan: false }" class="space-y-1">
                 <button @click="localPengajuan = !localPengajuan"
                     class="w-full flex items-center justify-between px-4 py-3 text-sm font-bold uppercase tracking-widest rounded-xl {{ request()->routeIs('pengajuan.*') || request()->routeIs('kategori.*') ? 'text-blue-400' : 'text-slate-400' }} hover:bg-white/5 hover:text-white transition-colors">
@@ -219,32 +188,6 @@
                     <a href="{{ route('kategori.index') }}"
                         class="block py-2 text-xs font-bold uppercase {{ request()->routeIs('kategori.*') ? 'text-blue-400' : 'text-slate-500' }} hover:text-blue-400 transition-colors">Master
                         Kategori Pengajuan</a>
-                </div>
-            </div>
-
-            <div x-data="{ localOpen: false }" class="space-y-1">
-                <button @click="localOpen = !localOpen"
-                    class="w-full flex items-center justify-between px-4 py-3 text-sm font-bold uppercase tracking-widest rounded-xl text-slate-400 hover:bg-white/5 hover:text-white transition-colors">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1m-4 0a1 1 0 001 1h1">
-                            </path>
-                        </svg>
-                        Kendaraan
-                    </div>
-                    <svg class="w-4 h-4 transition-transform" :class="localOpen ? 'rotate-180' : ''" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                        </path>
-                    </svg>
-                </button>
-                <div x-show="localOpen" class="pl-12 space-y-1">
-                    <a href="{{ route('toll.index') }}"
-                        class="block py-2 text-xs font-bold uppercase text-slate-500 hover:text-blue-400 transition-colors">Biaya
-                        Tol</a>
-                    <a href="{{ route('bensin.index') }}"
-                        class="block py-2 text-xs font-bold uppercase text-slate-500 hover:text-blue-400 transition-colors">Bensin</a>
                 </div>
             </div>
         </div>
