@@ -50,7 +50,9 @@ class BiayaPerjalananController extends Controller
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('customer_nama', 'like', "%{$search}%")
-                        ->orWhereHas('marketing', fn($m) => $m->where('nama', 'like', "%{$search}%"));
+                        ->orWhereHas('marketing', fn($m) => $m->where('nama', 'like', "%{$search}%"))
+                        ->orWhere('keterangan', 'like', "%{$search}%")
+                        ->orWhere('customer_cp', 'like', "%{$search}%");
                 });
             })
             ->latest()->paginate(10, ['*'], 'page_topup');
@@ -62,10 +64,25 @@ class BiayaPerjalananController extends Controller
                 $q->where(function ($query) use ($search) {
                     $query->where('customer_nama', 'like', "%{$search}%")
                         ->orWhere('nama_gerbang', 'like', "%{$search}%")
-                        ->orWhereHas('marketing', fn($m) => $m->where('nama', 'like', "%{$search}%"));
+                        ->orWhereHas('marketing', fn($m) => $m->where('nama', 'like', "%{$search}%"))
+                        ->orWhere('keterangan', 'like', "%{$search}%")
+                        ->orWhere('customer_cp', 'like', "%{$search}%");
                 });
             })
             ->latest()->paginate(10, ['*'], 'page_pakai');
+
+        // Data Selisih Tol
+        $selisih_tol = BiayaTol::with('marketing')
+            ->where('kategori', 'Selisih Tol')
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($query) use ($search) {
+                    $query->where('customer_nama', 'like', "%{$search}%")
+                        ->orWhereHas('marketing', fn($m) => $m->where('nama', 'like', "%{$search}%"))
+                        ->orWhere('keterangan', 'like', "%{$search}%")
+                        ->orWhere('customer_cp', 'like', "%{$search}%");
+                });
+            })
+            ->latest()->paginate(10, ['*'], 'page_selisih');
 
         // 4. Query Bensin
         $bensin = BiayaBensin::with('marketing')
@@ -78,7 +95,7 @@ class BiayaPerjalananController extends Controller
             })
             ->latest()->paginate(10, ['*'], 'page_bensin');
 
-        return view('biaya_perjalanan.index', compact('akomodasi', 'operasional', 'topup_tol', 'pemakaian_tol', 'bensin'));
+        return view('biaya_perjalanan.index', compact('akomodasi', 'operasional', 'topup_tol', 'pemakaian_tol', 'selisih_tol', 'bensin'));
     }
 
     /**
@@ -123,14 +140,14 @@ class BiayaPerjalananController extends Controller
                 'durasi' => $request->durasi ?? 1,
                 'nominal' => ($tarif->nominal ?? 0) * ($request->durasi ?? 1),
             ]);
-        } elseif (in_array($kat, ['Top-Up Tol', 'Pemakaian Tol'])) {
+        } elseif (in_array($kat, ['Top-Up Tol', 'Pemakaian Tol', 'Selisih Tol'])) {
             TempTol::create([
                 'marketing_id' => $request->marketing_id,
                 'tanggal' => $request->tanggal,
                 'customer_nama' => $request->customer_nama,
                 'customer_cp' => $request->customer_cp,
                 'kategori' => $kat,
-                'nama_gerbang' => $kat === 'Pemakaian Tol' ? $request->nama_gerbang : 'Top Up Tol',
+                'nama_gerbang' => $kat === 'Pemakaian Tol' ? $request->nama_gerbang : ($kat === 'Selisih Tol' ? '' : 'Top Up Tol'),
                 'keterangan' => $request->keterangan,
                 'nominal' => $cleanNominal,
             ]);
@@ -192,6 +209,8 @@ class BiayaPerjalananController extends Controller
                                     $marketing->increment('sisa_saldo_tol', $item->nominal);
                                 } elseif ($item->kategori === 'Pemakaian Tol') {
                                     $marketing->decrement('sisa_saldo_tol', $item->nominal);
+                                } elseif ($item->kategori === 'Selisih Tol') {
+                                    $marketing->decrement('sisa_saldo_tol', $item->nominal);
                                 }
                             }
                         }
@@ -242,7 +261,7 @@ class BiayaPerjalananController extends Controller
                 'customer_nama' => $request->customer_nama,
                 'customer_cp' => $request->customer_cp,
                 'kategori' => $request->kategori,
-                'nama_gerbang' => $request->kategori === 'Pemakaian Tol' ? $request->nama_gerbang : 'Top Up Tol',
+                'nama_gerbang' => $request->kategori === 'Pemakaian Tol' ? $request->nama_gerbang : ($request->kategori === 'Selisih Tol' ? '' : 'Top Up Tol'),
                 'nominal' => $cleanNominal,
                 'keterangan' => $request->keterangan,
             ]);
@@ -344,7 +363,7 @@ class BiayaPerjalananController extends Controller
                 'customer_nama' => $request->customer_nama,
                 'customer_cp'   => $request->customer_cp,
                 'kategori'      => $request->kategori,
-                'nama_gerbang'  => $request->kategori === 'Pemakaian Tol' ? $request->nama_gerbang : 'Top Up Tol',
+                'nama_gerbang'  => $request->kategori === 'Pemakaian Tol' ? $request->nama_gerbang : ($request->kategori === 'Selisih Tol' ? '' : 'Top Up Tol'),
                 'keterangan'    => $request->keterangan,
                 'nominal'       => $cleanNominal,
             ]);

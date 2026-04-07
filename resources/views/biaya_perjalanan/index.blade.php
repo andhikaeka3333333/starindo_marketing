@@ -52,6 +52,11 @@
                         Pemakaian Tol ({{ $pemakaian_tol->total() }})
                     </button>
 
+                    <button @click="tab = 'selisih_tol'; window.history.replaceState(null, null, '?tab=selisih_tol&search={{ request('search') }}')"
+                        :class="tab === 'selisih_tol' ? 'bg-white border-l border-r border-t border-slate-200 text-red-600 font-black rounded-t-2xl -mb-[1px]' : 'text-slate-400 hover:text-red-600 font-bold'"
+                        class="px-8 py-4 text-[10px] uppercase tracking-widest transition-all">
+                        Selisih Tol ({{ $selisih_tol->total() }})
+
                     <button @click="tab = 'bensin'; window.history.replaceState(null, null, '?tab=bensin&search={{ request('search') }}')"
                         :class="tab === 'bensin' ? 'bg-white border-l border-r border-t border-slate-200 text-emerald-600 font-black rounded-t-2xl -mb-[1px]' : 'text-slate-400 hover:text-emerald-600 font-bold'"
                         class="px-8 py-4 text-[10px] uppercase tracking-widest transition-all">
@@ -185,6 +190,42 @@
                         </table>
                         <div class="mt-6">{{ $pemakaian_tol->appends(['tab' => 'pakai_tol', 'search' => request('search')])->links() }}</div>
                     </div>
+
+                    <div x-show="tab === 'selisih_tol'" x-cloak>
+                        <table class="w-full text-left text-[11px] whitespace-nowrap table-auto">
+                            <thead class="text-slate-400 uppercase font-black tracking-widest border-b border-slate-100">
+                                <tr>
+                                    <th class="py-4 px-4">Tgl</th><th class="py-4 px-4">Marketing</th><th class="py-4 px-4">Customer</th><th class="py-4 px-4">Kontak</th><th class="py-4 px-4">Kategori</th><th class="py-4 px-4">Keterangan</th><th class="py-4 px-4 text-right">IDR Value</th><th class="py-4 px-4 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                @forelse($selisih_tol as $s)
+                                    <tr class="hover:bg-red-50/30 transition-colors">
+                                        <td class="py-5 px-4 font-bold text-slate-400">{{ date('d/m/y H:i', strtotime($s->tanggal)) }}</td>
+                                        <td class="py-5 px-4 font-black uppercase">{{ $s->marketing->nama ?? 'N/A' }}</td>
+                                        <td class="py-5 px-4 font-black text-slate-800 uppercase">{{ $s->customer_nama }}</td>
+                                        <td class="py-5 px-4 font-bold text-slate-400">{{ $s->customer_cp ?? '-' }}</td>
+                                        <td class="py-5 px-4 font-bold text-red-600 uppercase">{{ $s->kategori }}</td>
+                                        <td class="py-5 px-4 max-w-[150px] truncate uppercase font-medium text-slate-500">{{ $s->keterangan ?? '-' }}</td>
+                                        <td class="py-5 px-4 text-right font-black text-sm text-slate-900">Rp {{ number_format($s->nominal, 0, ',', '.') }}</td>
+                                        <td class="py-5 px-4 text-right">
+                                            <div class="flex justify-end gap-4">
+                                                <a href="{{ route('biaya-perjalanan.edit', ['tol', $s->id]) }}" class="text-slate-300 hover:text-blue-600 transition-colors">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="py-5 px-4 text-center text-slate-500">Tidak ada data selisih tol yang ditemukan.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                        <div class="mt-6">{{ $selisih_tol->appends(['tab' => 'selisih_tol', 'search' => request('search')])->links() }}</div>
+                    </div>
+
 
                     <div x-show="tab === 'bensin'" x-cloak>
                         <table class="w-full text-left text-[11px] whitespace-nowrap table-auto">
