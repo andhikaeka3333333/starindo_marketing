@@ -29,7 +29,7 @@ class RekapController extends Controller
                 ->where('marketing_id', $marketingId)
                 ->where(function ($q) use ($from, $to) {
                     $q->where('periode_dari', '<=', $to)
-                      ->where('periode_sampai', '>=', $from);
+                        ->where('periode_sampai', '>=', $from);
                 })
                 ->paginate(10, ['*'], 'p_omset')->appends($request->query());
 
@@ -67,11 +67,12 @@ class RekapController extends Controller
                 ->sum('nominal_value');
 
             $totalBiayaJalan = BiayaAkomodasi::where('marketing_id', $marketingId)->whereBetween('tanggal', [$from, $to])->sum('nominal') +
-                               BiayaTol::where('marketing_id', $marketingId)->where('kategori', 'Top-Up Tol')->whereBetween('tanggal', [$startDate, $endDate])->sum('nominal') +
-                               BiayaBensin::where('marketing_id', $marketingId)->whereBetween('tanggal', [$from, $to])->sum('nominal') +
-                               BiayaOperasional::where('marketing_id', $marketingId)->whereBetween('tanggal', [$from, $to])->sum('nominal');
-
-            $labaBersih = $totalOmset - ($totalBiayaJalan + $totalPengajuan);
+                BiayaTol::where('marketing_id', $marketingId)->where('kategori', 'Top-Up Tol')->whereBetween('tanggal', [$startDate, $endDate])->sum('nominal') +
+                BiayaBensin::where('marketing_id', $marketingId)->whereBetween('tanggal', [$from, $to])->sum('nominal') +
+                BiayaOperasional::where('marketing_id', $marketingId)->whereBetween('tanggal', [$from, $to])->sum('nominal');
+            $totalPengeluaran = $totalBiayaJalan + $totalPengajuan;
+            $labaBersih = $totalOmset - $totalPengeluaran;
+            $persenKeuntungan = $totalOmset > 0 ? ($labaBersih / $totalOmset) * 100 : 0;
 
             $data = (object) [
                 'marketing' => $selectedMarketing,
@@ -85,6 +86,8 @@ class RekapController extends Controller
                     'total_omset' => $totalOmset,
                     'total_pengajuan' => $totalPengajuan,
                     'total_biaya' => $totalBiayaJalan,
+                    'total_pengeluaran' => $totalPengeluaran,
+                    'persen_keuntungan' => $persenKeuntungan,
                     'laba_bersih' => $labaBersih
                 ]
             ];

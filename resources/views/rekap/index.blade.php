@@ -46,29 +46,49 @@
 
             @if ($data)
                 {{-- SUMMARY CARDS --}}
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                    <div class="bg-slate-900 p-8 rounded-[2.5rem] shadow-xl text-white">
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+                    {{-- 1. TOTAL OMSET --}}
+                    <div class="bg-slate-900 p-6 rounded-[2.5rem] shadow-xl text-white">
                         <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Total Omset</p>
-                        <p class="text-3xl font-black tracking-tighter">Rp
-                            {{ number_format($data->summary['total_omset'], 0, ',', '.') }}</p>
+                        <p class="text-2xl font-black tracking-tighter">
+                            Rp {{ number_format($data->summary['total_omset'], 0, ',', '.') }}
+                        </p>
                     </div>
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-200">
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Biaya
-                            Perjalanan</p>
-                        <p class="text-3xl font-black text-slate-800 tracking-tighter text-red-600">Rp
-                            {{ number_format($data->summary['total_biaya'], 0, ',', '.') }}</p>
+
+                    {{-- 2. TOTAL BIAYA PERJALANAN --}}
+                    <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-200">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Biaya Jalan
+                        </p>
+                        <p class="text-2xl font-black text-red-600 tracking-tighter">
+                            Rp {{ number_format($data->summary['total_biaya'], 0, ',', '.') }}
+                        </p>
                     </div>
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-200">
+
+                    {{-- 3. TOTAL PENGAJUAN --}}
+                    <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-200">
                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Pengajuan
                         </p>
-                        <p class="text-3xl font-black text-slate-800 tracking-tighter text-purple-600">Rp
-                            {{ number_format($data->summary['total_pengajuan'], 0, ',', '.') }}</p>
+                        <p class="text-2xl font-black text-purple-600 tracking-tighter">
+                            Rp {{ number_format($data->summary['total_pengajuan'], 0, ',', '.') }}
+                        </p>
                     </div>
+
+                    {{-- 4. LABA BERSIH --}}
+                    <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-200">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Laba Bersih</p>
+                        <p
+                            class="text-2xl font-black {{ $data->summary['laba_bersih'] < 0 ? 'text-red-600' : 'text-emerald-500' }} tracking-tighter">
+                            Rp {{ number_format($data->summary['laba_bersih'], 0, ',', '.') }}
+                        </p>
+                    </div>
+
+                    {{-- 5. KARTU PROSENTASE (CARD SENDIRI) --}}
                     <div
-                        class="p-8 rounded-[2.5rem] shadow-xl text-white {{ $data->summary['laba_bersih'] < 0 ? 'bg-red-600' : 'bg-emerald-500' }}">
-                        <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Laba Bersih</p>
-                        <p class="text-3xl font-black tracking-tighter">Rp
-                            {{ number_format($data->summary['laba_bersih'], 0, ',', '.') }}</p>
+                        class="p-6 rounded-[2.5rem] shadow-xl text-white {{ $data->summary['persen_keuntungan'] < 0 ? 'bg-red-600' : 'bg-blue-600' }}">
+                        <p class="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2">Prosentase Laba</p>
+                        <p class="text-4xl font-black tracking-tighter">
+                            {{ number_format($data->summary['persen_keuntungan'], 2, ',', '.') }}%
+                        </p>
                     </div>
                 </div>
 
