@@ -11,6 +11,11 @@
             if (!val) return '';
             let angka = val.toString().replace(/\D/g, '');
             return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        },
+        formatToll(val) {
+            if (!val) return '';
+            // Logic strip realtime setiap 4 digit
+            return val.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1-').substring(0, 19);
         }
     }">
         <div class="max-w-[1400px] mx-auto sm:px-6 lg:px-8 space-y-8">
@@ -31,6 +36,7 @@
 
                 <div class="lg:col-span-8 space-y-8">
 
+                    {{-- TABLE LIST MARKETING --}}
                     <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
                         <div class="p-8 border-b border-slate-50 flex justify-between items-center">
                             <h3 class="font-black text-slate-800 uppercase italic tracking-tighter">List Marketing</h3>
@@ -60,8 +66,8 @@
                                             {{ $m->nama }}</td>
                                         <td class="px-8 py-5 font-black text-xs text-indigo-600 italic tracking-widest">
                                             {{ $m->no_kartu_tol ?? '----' }}</td>
-                                        <td class="px-8 py-5 text-right font-black text-sm text-slate-700 italic">
-                                            Rp {{ number_format($m->sisa_saldo_tol, 0, ',', '.') }}</td>
+                                        <td class="px-8 py-5 text-right font-black text-sm text-slate-700 italic">Rp
+                                            {{ number_format($m->sisa_saldo_tol, 0, ',', '.') }}</td>
                                         <td class="px-8 py-5 text-center">
                                             <span
                                                 class="px-3 py-1 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-lg text-[9px] font-black uppercase italic">LVL
@@ -100,13 +106,74 @@
                         <div class="p-6 border-t border-slate-50 italic">{{ $marketings->links() }}</div>
                     </div>
 
+                    {{-- TABLE MASTER TARIF DENGAN DYNAMIC FILTER --}}
                     <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
                         <div class="p-8 border-b border-slate-50 flex justify-between items-center">
-                            <h3 class="font-black text-slate-800 uppercase italic tracking-tighter">Master Tarif</h3>
+                            <div>
+                                <h3 class="font-black text-slate-800 uppercase italic tracking-tighter">Master Tarif
+                                </h3>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                                    Konfigurasi Biaya Perjalanan</p>
+                            </div>
                             <button @click="showTarifModal = true"
                                 class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
                                 + TAMBAH TARIF
                             </button>
+                        </div>
+
+                        {{-- DYNAMIC FILTER SECTION --}}
+                        <div class="bg-slate-50/50 p-6 border-b border-slate-100">
+                            <form action="{{ url()->current() }}" method="GET"
+                                class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                                <div>
+                                    <label
+                                        class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block ml-1">Filter
+                                        Level</label>
+                                    <select name="f_level"
+                                        class="w-full bg-white border-slate-200 rounded-xl text-[10px] font-black uppercase italic focus:ring-indigo-600 transition-all">
+                                        <option value="">Semua Level</option>
+                                        @foreach ($listLevelFilter as $lvl)
+                                            <option value="{{ $lvl }}"
+                                                {{ request('f_level') == $lvl ? 'selected' : '' }}>Level
+                                                {{ $lvl }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block ml-1">Filter
+                                        Kategori</label>
+                                    <select name="f_kategori"
+                                        class="w-full bg-white border-slate-200 rounded-xl text-[10px] font-black uppercase italic focus:ring-indigo-600 transition-all">
+                                        <option value="">Semua Kategori</option>
+                                        @foreach ($listKategoriFilter as $kat)
+                                            <option value="{{ $kat }}"
+                                                {{ request('f_kategori') == $kat ? 'selected' : '' }}>
+                                                {{ $kat }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block ml-1">Filter
+                                        Wilayah</label>
+                                    <select name="f_wilayah"
+                                        class="w-full bg-white border-slate-200 rounded-xl text-[10px] font-black uppercase italic focus:ring-indigo-600 transition-all">
+                                        <option value="">Semua Wilayah</option>
+                                        @foreach ($listWilayahFilter as $wil)
+                                            <option value="{{ $wil }}"
+                                                {{ request('f_wilayah') == $wil ? 'selected' : '' }}>
+                                                {{ $wil }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit"
+                                        class="flex-1 bg-slate-900 text-white py-2 rounded-xl font-black text-[9px] uppercase hover:bg-indigo-600 transition-all">APPLY</button>
+                                    <a href="{{ route('marketing.index') }}"
+                                        class="px-4 bg-slate-200 text-slate-600 py-2 rounded-xl font-black text-[9px] uppercase hover:bg-slate-300 transition-all flex items-center justify-center">RESET</a>
+                                </div>
+                            </form>
                         </div>
 
                         <form action="{{ route('marketing.update-tarif') }}" method="POST">
@@ -115,15 +182,20 @@
                                 <thead
                                     class="bg-slate-50/50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
                                     <tr>
-                                        <th class="px-8 py-5">Kategori</th>
                                         <th class="px-8 py-5 text-center">Level</th>
+                                        <th class="px-8 py-5">Kategori & Wilayah</th>
                                         <th class="px-8 py-5 text-right">Nominal (Rp)</th>
                                         <th class="px-8 py-5"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-50">
-                                    @foreach ($daftarTarif as $t)
+                                    @forelse ($daftarTarif as $t)
                                         <tr class="hover:bg-slate-50/30" x-data="{ val: formatRupiah('{{ (int) $t->nominal }}') }">
+                                            <td class="px-8 py-4 text-center">
+                                                <span
+                                                    class="text-[10px] font-black text-slate-400 uppercase italic">Level
+                                                    {{ $t->level }}</span>
+                                            </td>
                                             <td class="px-8 py-4">
                                                 <div
                                                     class="font-black text-slate-800 italic uppercase text-sm leading-none">
@@ -131,11 +203,6 @@
                                                 <div
                                                     class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                                                     {{ $t->wilayah }}</div>
-                                            </td>
-                                            <td class="px-8 py-4 text-center">
-                                                <span
-                                                    class="text-[10px] font-black text-slate-400 uppercase italic">Level
-                                                    {{ $t->level }}</span>
                                             </td>
                                             <td class="px-8 py-4">
                                                 <div class="flex items-center justify-end group">
@@ -158,19 +225,28 @@
                                                 </a>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @empty
+                                        <tr>
+                                            <td colspan="4"
+                                                class="px-8 py-10 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest italic">
+                                                Tidak ada data tarif untuk filter ini.</td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
-                            <div class="p-8 bg-slate-50/50 border-t border-slate-100 flex justify-end">
-                                <button type="submit"
-                                    class="px-8 py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all transform hover:-translate-y-0.5 shadow-md">
-                                    Update Semua Nominal
-                                </button>
-                            </div>
+                            @if ($daftarTarif->count() > 0)
+                                <div class="p-8 bg-slate-50/50 border-t border-slate-100 flex justify-end">
+                                    <button type="submit"
+                                        class="px-8 py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all transform hover:-translate-y-0.5 shadow-md">
+                                        Update Nominal Terfilter
+                                    </button>
+                                </div>
+                            @endif
                         </form>
                     </div>
                 </div>
 
+                {{-- SIDEBAR: ADD MARKETING --}}
                 <div class="lg:col-span-4">
                     <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-10 sticky top-8">
                         <div class="mb-8 border-b border-slate-50 pb-6">
@@ -191,18 +267,20 @@
                                     placeholder="Input Nama..." required>
                             </div>
 
-                            <div class="space-y-1">
+                            <div class="space-y-1" x-data="{ tollNo: '' }">
                                 <label
                                     class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Nomor
                                     Kartu Tol</label>
-                                <input type="text" name="no_kartu_tol"
+                                <input type="text" name="no_kartu_tol" x-model="tollNo"
+                                    @input="tollNo = formatToll($event.target.value)"
                                     class="w-full bg-slate-50 border-slate-100 rounded-2xl p-4 font-black text-indigo-600 text-sm shadow-inner focus:ring-2 focus:ring-indigo-600 focus:bg-white italic tracking-widest placeholder-slate-300 transition-all"
-                                    placeholder="Contoh: 1234...">
+                                    placeholder="XXXX-XXXX-XXXX-XXXX">
                             </div>
 
                             <div class="space-y-1">
                                 <label
-                                    class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Saldo Awal Tol (Rp)</label>
+                                    class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Saldo
+                                    Awal Tol (Rp)</label>
                                 <div x-data="{ s: '' }">
                                     <input type="text" x-model="s"
                                         @input="s = formatRupiah($event.target.value)"
@@ -241,6 +319,7 @@
             </div>
         </div>
 
+        {{-- MODAL TAMBAH TARIF BARU --}}
         <div x-show="showTarifModal"
             class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
             x-cloak>

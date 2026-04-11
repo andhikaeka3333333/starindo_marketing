@@ -10,12 +10,12 @@ class MarketingController extends Controller
 {
     public function index(Request $request)
     {
+        // --- LOGIKA FILTER & PAGINATION MARKETING ---
         $search = $request->query('search');
-
         $marketings = Marketing::when($search, function ($query, $search) {
-                return $query->where('nama', 'like', "%{$search}%")
-                             ->orWhere('no_kartu_tol', 'like', "%{$search}%");
-            })
+            return $query->where('nama', 'like', "%{$search}%")
+                ->orWhere('no_kartu_tol', 'like', "%{$search}%");
+        })
             ->orderBy('level', 'asc')
             ->paginate(10)
             ->withQueryString();
@@ -27,12 +27,37 @@ class MarketingController extends Controller
             'lvl3'  => Marketing::where('level', 3)->count(),
         ];
 
-        $daftarTarif = TarifPerjalanan::orderBy('kategori', 'asc')
-            ->orderBy('wilayah', 'asc')
+        // --- LOGIKA FILTER MASTER TARIF ---
+        $fLevel = $request->query('f_level');
+        $fKategori = $request->query('f_kategori');
+        $fWilayah = $request->query('f_wilayah');
+
+        $daftarTarif = TarifPerjalanan::when($fLevel, function ($q) use ($fLevel) {
+            return $q->where('level', $fLevel);
+        })
+            ->when($fKategori, function ($q) use ($fKategori) {
+                return $q->where('kategori', $fKategori);
+            })
+            ->when($fWilayah, function ($q) use ($fWilayah) {
+                return $q->where('wilayah', $fWilayah);
+            })
             ->orderBy('level', 'asc')
+            ->orderBy('kategori', 'asc')
             ->get();
 
-        return view('marketing.index', compact('marketings', 'stats', 'daftarTarif'));
+        // MENGAMBIL LIST FILTER SECARA DINAMIS DARI DATABASE
+        $listLevelFilter    = TarifPerjalanan::distinct()->orderBy('level', 'asc')->pluck('level');
+        $listKategoriFilter = TarifPerjalanan::distinct()->orderBy('kategori', 'asc')->pluck('kategori');
+        $listWilayahFilter  = TarifPerjalanan::distinct()->orderBy('wilayah', 'asc')->pluck('wilayah');
+
+        return view('marketing.index', compact(
+            'marketings',
+            'stats',
+            'daftarTarif',
+            'listLevelFilter',
+            'listKategoriFilter',
+            'listWilayahFilter'
+        ));
     }
 
     public function store(Request $request)
